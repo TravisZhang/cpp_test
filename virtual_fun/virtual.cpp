@@ -10,11 +10,11 @@ class A
        {
           a = 1;
        }
-       virtual void show() = 0;
-       // void show()
-       // {
-       //    cout <<a<<endl;
-       // }
+       // virtual void show() = 0;
+       void show()
+       {
+          cout <<a<<endl;
+       }
 };
 
 class B: public A
