@@ -52,21 +52,21 @@ int main(void)
 	//定义多张表格，张数为硬币的种类，每张表格有money+1列。
 	vector <vector<unit>> table(types, vector <unit> (money+1));
 
-	vector <vector <vector <unit>>> table_full;
+	// vector <vector <vector <unit>>> table_full;
 
-	table_full.resize(types);
-	for(int i = 0;i < types;++i)
-	{
-		table_full[i].resize(money+1);
-		for(int j = 0;j < money+1;++j)
-		{
-			table_full[i][j].resize(1);
-		}
-	}
+	// table_full.resize(types);
+	// for(int i = 0;i < types;++i)
+	// {
+	// 	table_full[i].resize(money+1);
+	// 	for(int j = 0;j < money+1;++j)
+	// 	{
+	// 		table_full[i][j].resize(1);
+	// 	}
+	// }
 
 	//对于一个列,对于各种解决方案的总硬币数目进行存储，
 	vector<int> result;
-	vector<unit> result_full;
+	// vector<unit> result_full;
 	
 
 	for (int i = 0; i < types; i++)  //开始考虑每个币种，
@@ -82,9 +82,9 @@ int main(void)
 
 				table[i][j].message = to_string(j) + "*" + to_string(1); //信息
 
-				table_full[i][j].push_back(table[i][j]);
+				// table_full[i][j].push_back(table[i][j]);
 
-				table_full[i][j][0].type_num_list[i] = j;
+				// table_full[i][j][0].type_num_list[i] = j;
 
 			}
 		}
@@ -100,16 +100,16 @@ int main(void)
 					//当前币值的硬币用了k个，不足的部分用上一个表的最佳方案。
 					result.push_back(k + table[i-1][j - k*coin[i]].coin);
 
-					cout << "k " <<k<<endl;
-					cout << "table_full[i-1][j - k*coin[i]].size() "<<table_full[i-1][j - k*coin[i]].size()<<endl;
+					// cout << "k " <<k<<endl;
+					// cout << "table_full[i-1][j - k*coin[i]].size() "<<table_full[i-1][j - k*coin[i]].size()<<endl;
 
-					for(int m = 0; m < table_full[i-1][j - k*coin[i]].size(); ++m)
-					{
-						cout << "m "<<m<<endl;
-						table_full[i-1][j - k*coin[i]][m].type_num_list[i] = k;
-						result_full.push_back(table_full[i-1][j - k*coin[i]][m]);
+					// for(int m = 0; m < table_full[i-1][j - k*coin[i]].size(); ++m)
+					// {
+					// 	cout << "m "<<m<<endl;
+					// 	table_full[i-1][j - k*coin[i]][m].type_num_list[i] = k;
+					// 	result_full.push_back(table_full[i-1][j - k*coin[i]][m]);
 
-					}
+					// }
 
 				}
 
@@ -124,28 +124,28 @@ int main(void)
 				//更信信息
 				table[i][j].message = table[i - 1][j - coin[i]*l].message +"+" +to_string(l) + "*" + to_string(coin[i]);
 
-				table_full[i][j] = result_full;
+				// table_full[i][j] = result_full;
 
-				cout << "table_full[i][j].size() "<<table_full[i][j].size()<<endl;
-				for(int n = 0;n < table_full[i][j].size(); ++n)
-				{
-					cout<<"n "<<n<<endl;
-					// cout<<"global_types "<<global_types<<endl;
-					table_full[i][j][n].message = "";
-					for(int p = 0;p < global_types;++p)
-					{
-						// cout<<"p "<<p<<endl;
-						if(p == 0)
-							table_full[i][j][n].message += to_string(table_full[i][j][n].type_num_list[p]) + "*" + to_string(coin[p]);
-						else
-							table_full[i][j][n].message += "+" + to_string(table_full[i][j][n].type_num_list[p]) + "*" + to_string(coin[p]);
-					}				
-				}
+				// cout << "table_full[i][j].size() "<<table_full[i][j].size()<<endl;
+				// for(int n = 0;n < table_full[i][j].size(); ++n)
+				// {
+				// 	cout<<"n "<<n<<endl;
+				// 	// cout<<"global_types "<<global_types<<endl;
+				// 	table_full[i][j][n].message = "";
+				// 	for(int p = 0;p < global_types;++p)
+				// 	{
+				// 		// cout<<"p "<<p<<endl;
+				// 		if(p == 0)
+				// 			table_full[i][j][n].message += to_string(table_full[i][j][n].type_num_list[p]) + "*" + to_string(coin[p]);
+				// 		else
+				// 			table_full[i][j][n].message += "+" + to_string(table_full[i][j][n].type_num_list[p]) + "*" + to_string(coin[p]);
+				// 	}				
+				// }
 				
 				//清空，准备下一个列的计算。
 				result.clear();
 
-				result_full.clear();
+				// result_full.clear();
 
 			}
 		
@@ -157,38 +157,38 @@ int main(void)
 	cout << "需要的硬币数目为 " << table[types - 1][money].coin << endl;
 	cout << "最佳解决方案为 " << table[types - 1][money].message << endl;
 
-	vector<unit> table_final;
+	// vector<unit> table_final;
 
-	table_final.push_back(table_full[0][money][0]);
+	// table_final.push_back(table_full[0][money][0]);
 
-	for(int i = 0;i < types;++i)
-	{
-		cout << "i " << i <<endl;
-		for(int j = 0;j < table_full[i][money].size();++j)
-		{
-			cout << "j " << j <<endl;
-			for(int m = 0;m < table_final.size();++m)
-			{
-				cout << "m " << m <<endl;
-				int flag = 0;
-				for(int k = 0;k < types;++k)
-				{
-					if(table_full[i][money][j].type_num_list[k] == table_final[m].type_num_list[k])
-						flag++;
-				}
-				if(flag<types)
-				{
-					table_final.push_back(table_full[i][money][j]);
-				}
-			}
-		}
-	}
+	// for(int i = 0;i < types;++i)
+	// {
+	// 	cout << "i " << i <<endl;
+	// 	for(int j = 0;j < table_full[i][money].size();++j)
+	// 	{
+	// 		cout << "j " << j <<endl;
+	// 		for(int m = 0;m < table_final.size();++m)
+	// 		{
+	// 			cout << "m " << m <<endl;
+	// 			int flag = 0;
+	// 			for(int k = 0;k < types;++k)
+	// 			{
+	// 				if(table_full[i][money][j].type_num_list[k] == table_final[m].type_num_list[k])
+	// 					flag++;
+	// 			}
+	// 			if(flag<types)
+	// 			{
+	// 				table_final.push_back(table_full[i][money][j]);
+	// 			}
+	// 		}
+	// 	}
+	// }
 
-	cout << "全部解决方案为 " << endl;
-	for(int i = 0;i < table_final.size();++i)
-	{
-		cout << table_final[i].message << endl;
-	}
+	// cout << "全部解决方案为 " << endl;
+	// for(int i = 0;i < table_final.size();++i)
+	// {
+	// 	cout << table_final[i].message << endl;
+	// }
 
 	// system("pause");
 	return 0;
