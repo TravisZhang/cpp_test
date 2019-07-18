@@ -31,5 +31,9 @@ int main(int argc, char* argv[])
     cout << "list0 size: " << sizeof(list0)/sizeof(float) << endl;
     test_list_size(list0);
 
+    float g = 5.0f, h = 2.0f;
+    g /= h*2.0f;
+    cout << "g: " << g << endl;
+
     return 0;
 }
