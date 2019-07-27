@@ -40,7 +40,7 @@ class List
 public:
     List() {}
     // ~List() {
-    //     if(head_ != nullptr) {
+    //     if(!Empty()) {
     //         while((*head_).next_ != nullptr) {
     //             Node<T> *tmp_ptr = head_;
     //             head_ = (*head_).next_;
@@ -49,23 +49,23 @@ public:
     //         ~(*head_)();
     //     }
     // }
+    bool Empty() const {
+    	return head_ == nullptr;
+    }
     ~List() {
-    	if(head_ != nullptr) {
+    	if(!Empty()) {
     		head_->~Node<T>();
     	}
     }
     void PushFront(const T& value) {
-    	// if(head_ == nullptr) {
-	    //     head_ = new Node<T>(nullptr, nullptr, value);
-	    // }
-	    // else {
-	    // 	Node<T> *tmp_ptr = new Node<T>(nullptr, head_, value);
-	    // 	head_ = tmp_ptr;
-	    // }
-	    head_ = new Node<T>(nullptr, head_, value);
+	    Node<T> *tmp_ptr = new Node<T>(nullptr, head_, value);
+	    if(!Empty()) {
+	    	head_->SetPrePtr(tmp_ptr);
+	    }
+	    head_ = tmp_ptr;
     }
     void PushBack(const T& value) {
-    	if(head_ == nullptr) {
+    	if(Empty()) {
             head_ = new Node<T>(nullptr, nullptr, value);
         }
         else {
@@ -73,27 +73,27 @@ public:
         	while(tmp_ptr->GetNextPtr() != nullptr) {
         		tmp_ptr = tmp_ptr->GetNextPtr();
         	}
-        	std::cout << "tmp_ptr->GetValue(): " << tmp_ptr->GetValue() << std::endl;
         	Node<T> *new_node_ptr = new Node<T>(tmp_ptr, nullptr, value);
         	tmp_ptr->SetNextPtr(new_node_ptr);
-        	std::cout << "tmp_ptr->GetNextPtr()->GetValue(): " << tmp_ptr->GetNextPtr()->GetValue() << std::endl;
         }
-        std::cout << "aaa" << std::endl;
     }
     T PopFront() {
-    	if(head_ == nullptr) {
+    	if(Empty()) {
+    		std::cout << "head null" << std::endl;
     		exit(0);
     	}
     	else {
+    		Node<T> *tmp_ptr = head_;
 	    	head_ = head_->GetNextPtr();
-	    	(head_->GetPrePtr())->SetNextPtr(nullptr);
-	    	const T value = (head_->GetPrePtr())->GetValue();
-	    	(head_->GetPrePtr())->~Node<T>();
+	    	tmp_ptr->SetNextPtr(nullptr);
+	    	const T value = tmp_ptr->GetValue();
+	    	tmp_ptr->~Node<T>();
 	    	return value;
 	    }
     }
     T PopBack() const {
-    	if(head_ == nullptr) {
+    	if(Empty()) {
+    		std::cout << "head null" << std::endl;
     		exit(0);
     	}
     	else {
@@ -109,7 +109,7 @@ public:
     }
     int Size() {
     	int size = 0;
-    	if(head_ != nullptr) {
+    	if(!Empty()) {
     		++size;
     		Node<T> *tmp_ptr = head_;
 	    	while(tmp_ptr->GetNextPtr() != nullptr) {
@@ -120,14 +120,15 @@ public:
 	    return size;
     }
     void Show() {
-    	if(head_ != nullptr) {
-    		Node<T> *tmp_ptr = head_;
-	    	while(tmp_ptr->GetNextPtr() != nullptr) {
-	    		std::cout << "value: " << tmp_ptr->GetValue() << std::endl; 
-	    		tmp_ptr = tmp_ptr->GetNextPtr();
-	    	}
+    	Node<T> *tmp_ptr = head_;
+  		std::cout << "value: ";
+    	while(tmp_ptr != nullptr) {
+    		std::cout << tmp_ptr->GetValue() << ' '; 
+    		tmp_ptr = tmp_ptr->GetNextPtr();
     	}
+    	std::cout << std::endl;
     }
+
 private:
     Node<T> *head_ = nullptr;
 };
@@ -152,6 +153,7 @@ int main() {
   list1.PushBack(9);
   assert(list1.Size() == 1);
   std::cout << "list1.Size(): " << list1.Size() << std::endl;
+  list1.Show();
 
   // Deeper test
   List<int> list2;
@@ -161,9 +163,12 @@ int main() {
   std::cout << "list2.Size(): " << list2.Size() << std::endl;
   assert(list2.Size() == 2);
   std::cout << "list2.Size() after Size(): " << list2.Size() << std::endl;
+  list2.Show();
   assert(list2.PopBack() == 10);
   std::cout << "list2.Size() after PopBack(): " << list2.Size() << std::endl;
+  list2.Show();
   assert(list2.PopFront() == 9);
   std::cout << "list2.Size() after PopFront(): " << list2.Size() << std::endl;
+  list2.Show();
   assert(list2.Size() == 0);
 }
