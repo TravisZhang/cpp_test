@@ -58,23 +58,36 @@ public:
     	}
     }
     void PushFront(const T& value) {
-	    Node<T> *tmp_ptr = new Node<T>(nullptr, head_, value);
-	    if(!Empty()) {
-	    	head_->SetPrePtr(tmp_ptr);
+	    Node<T> *tmp_ptr = new(std::nothrow) Node<T>(nullptr, head_, value);
+	    if(!tmp_ptr) {
+	    	std::cout << "ERROR!!! operation new failed" << std::endl;
 	    }
-	    head_ = tmp_ptr;
+	    else {
+		    if(!Empty()) {
+		    	head_->SetPrePtr(tmp_ptr);
+		    }
+		    head_ = tmp_ptr;
+    	}
     }
     void PushBack(const T& value) {
     	if(Empty()) {
-            head_ = new Node<T>(nullptr, nullptr, value);
+            head_ = new(std::nothrow) Node<T>(nullptr, nullptr, value);
+            if(!head_) {
+				    	std::cout << "ERROR!!! operation new failed" << std::endl;
+				    }
         }
         else {
         	Node<T> *tmp_ptr = head_;
         	while(tmp_ptr->GetNextPtr() != nullptr) {
         		tmp_ptr = tmp_ptr->GetNextPtr();
         	}
-        	Node<T> *new_node_ptr = new Node<T>(tmp_ptr, nullptr, value);
-        	tmp_ptr->SetNextPtr(new_node_ptr);
+        	Node<T> *new_node_ptr = new(std::nothrow) Node<T>(tmp_ptr, nullptr, value);
+        	if(!new_node_ptr) {
+			    	std::cout << "ERROR!!! operation new failed" << std::endl;
+			    }
+				  else {
+	        	tmp_ptr->SetNextPtr(new_node_ptr);
+	        }
         }
     }
     T PopFront() {
