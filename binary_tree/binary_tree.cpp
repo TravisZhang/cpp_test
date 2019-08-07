@@ -218,7 +218,7 @@ void BiTree<T>::TreeDelete(TNode<T>* x) {
 	else {
 		// if there are two children of x, we must choose from the bigger side
 		// the reason is we must make sure we can replace the new one's right sub tree with old right sub tree
-		// and if choose from left side, it's not possible
+		// and if choose from left side, it's not possible 
 		// and y(the replace one) must has no left child (so that it's the smallest on right side)
 		TNode<T>* y = GetSuccessor(x);
 		if (y == x->GetRight()) {
@@ -228,7 +228,7 @@ void BiTree<T>::TreeDelete(TNode<T>* x) {
 			(y->GetLeft())->SetParent(y);
 		}
 		else {
-			Transplant(y, y->GetRight());
+			Transplant(y, y->GetRight()); // because y has no left child
 			y->SetRight(x->GetRight());
 			(y->GetRight())->SetParent(y);
 			// below is the same as above
