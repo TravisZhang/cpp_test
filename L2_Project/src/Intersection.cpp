@@ -10,10 +10,16 @@
 
 /* Implementation of class "WaitingVehicles" */
 
-int WaitingVehicles::getSize() { return _vehicles.size(); }
+std::mutex TrafficObject::_mtxCout;
+
+int WaitingVehicles::getSize() {
+  std::lock_guard<std::mutex> lck(_mtx);
+  return _vehicles.size();
+}
 
 void WaitingVehicles::pushBack(std::shared_ptr<Vehicle> vehicle,
                                std::promise<void> &&promise) {
+  std::lock_guard<std::mutex> lck(_mtx);
   _vehicles.push_back(vehicle);
   _promises.push_back(std::move(promise));
 }
@@ -23,6 +29,7 @@ void WaitingVehicles::permitEntryToFirstInQueue() {
   // Then, fulfill promise and send signal back that permission to enter has
   // been granted.
   // Finally, remove the front elements from both queues.
+  std::unique_lock<std::mutex> lck(_mtx);
   auto prms = _promises.begin();
   auto vehicle = _vehicles.begin();
   prms->set_value();
@@ -59,6 +66,7 @@ Intersection::queryStreets(std::shared_ptr<Street> incoming) {
 // adds a new vehicle to the queue and returns once the vehicle is allowed to
 // enter
 void Intersection::addVehicleToQueue(std::shared_ptr<Vehicle> vehicle) {
+  std::unique_lock<std::mutex> lck(_mtxCout);
   std::cout << "Intersection #" << _id
             << "::addVehicleToQueue: thread id = " << std::this_thread::get_id()
             << std::endl;
@@ -69,8 +77,10 @@ void Intersection::addVehicleToQueue(std::shared_ptr<Vehicle> vehicle) {
   std::promise<void> prms;
   std::future<void> ftr = prms.get_future();
   _waitingVehicles.pushBack(vehicle, std::move(prms));
+  lck.unlock();
   ftr.wait();
 
+  lck.lock();
   std::cout << "Intersection #" << _id << ": Vehicle #" << vehicle->getID()
             << " is granted entry." << std::endl;
 }
