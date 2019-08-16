@@ -50,7 +50,10 @@ void TrafficLight::waitForGreen()
     // Once it receives TrafficLightPhase::green, the method returns.
     while (true) {
         auto msg = _msgque.receive();
+        std::cout << "light is red" << std::endl;
         if (msg == TrafficLightPhase::green) {
+            std::lock_guard<std::mutex> uLock(_mutex);
+            std::cout << "light is green" << std::endl;
             break;
         }
     }
@@ -76,10 +79,11 @@ void TrafficLight::cycleThroughPhases()
     // Also, the while-loop should use std::this_thread::sleep_for to wait 1ms between two cycles. 
 
     // initalize variables
-    srand((unsigned)time(NULL));
+    // srand((unsigned)time(NULL));
     double b = 6.0, a = 4.0;
     double cycleDuration = ((double)rand() /RAND_MAX * (b - a) + a) * 1000; // duration of a single simulation cycle in ms
     std::chrono::time_point<std::chrono::system_clock> lastUpdate;
+    std::cout << "duration: " << cycleDuration << std::endl;
     
     while (true) {
         // sleep at every iteration to reduce CPU usage
