@@ -212,9 +212,11 @@ public:
     void insert(myiterator p, auto in, const T& v);
     void push_back(const T& v);
     void pop_back() {
-        --pend_;
-        pend_->~T();
-        --actSize_;
+        if (actSize_ > 0) {
+            --pend_;
+            pend_->~T();
+            --actSize_;
+        }
     }
     void reserve(auto in);
     void resize(auto in);
