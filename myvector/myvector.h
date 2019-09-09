@@ -1,10 +1,10 @@
 #include <vector>
 #include <memory.h>
 #include <iostream>
-using namespace std;
 
 namespace myfun
 {
+using namespace std;
 
 template<class T>
 class Myvector
@@ -120,6 +120,19 @@ public:
         }
     }
 
+    /*Move constructor*/
+    Myvector(Myvector&& mv)
+    {
+        pstart_ = mv.begin();
+        pend_ = mv.end();
+        resSize_ = mv.capacity();
+        actSize_ = mv.size();
+        // cout << "pstart_ established" << endl;
+        mv.~Myvector();
+        // cout << "mv deleted" << endl;
+    }
+
+
     /*Element access overload*/
     T operator[] (auto&& in) // rvalue reference (can be used for lvalue too)
     {
@@ -150,10 +163,10 @@ public:
         return pstart_[idx]; 
     }
 
-    /*Equal Assign Operator overload*/
-    T& operator=(const T& mv)
+    /*Copy Assignment Constructor*/
+    Myvector& operator=(const Myvector& mv)
     {
-        if(this != mv)
+        if(this != &mv)
         {
             size_t n = mv.size();
             size_t nn = 1;
@@ -167,7 +180,8 @@ public:
                 // cout << "deconstructing element" << endl;
                 p->~T();
             }
-            myiterator pstart_ = new (std::nothrow) T[nn];
+            // delete [] pstart_;
+            pstart_ = new (std::nothrow) T[nn];
             // cout << "pstart_ established" << endl;
             if (!pstart_) {
                 // Handle error
@@ -176,10 +190,34 @@ public:
             else
             {
                 memcpy( pstart_, mv.begin(), (mv.size()) * sizeof(T) ); 
+                // memset( pstart_, 0, nn * sizeof(T) );
                 actSize_ = mv.size();
                 pend_ = pstart_ + actSize_;
                 resSize_ = nn;
             }
+        }
+        return *this;
+    }
+
+    /*Move Assignment Constructor*/
+    Myvector& operator=(Myvector&& mv)
+    {
+        if(this != &mv)
+        {
+            // cout << "deconstructing" << endl;
+            for(myiterator p = pstart_; p < pend_; ++p)
+            {
+                // cout << "deconstructing element" << endl;
+                p->~T();
+            }
+            // delete [] pstart_;
+            pstart_ = mv.begin();
+            pend_ = mv.end();
+            resSize_ = mv.capacity();
+            actSize_ = mv.size();
+            // cout << "pstart_ established" << endl;
+            mv.~Myvector();
+            // cout << "mv deleted" << endl;
         }
         return *this;
     }
@@ -197,6 +235,8 @@ public:
         // delete [] pstart_;
         pstart_ = NULL;
         pend_ = NULL;
+        resSize_ = 0;
+        actSize_ = 0;
         // cout << "destruction complete" << endl;
 
     }
@@ -212,9 +252,11 @@ public:
     void insert(myiterator p, auto in, const T& v);
     void push_back(const T& v);
     void pop_back() {
-        --pend_;
-        pend_->~T();
-        --actSize_;
+        if (actSize_ > 0) {
+            --pend_;
+            pend_->~T();
+            --actSize_;
+        }
     }
     void reserve(auto in);
     void resize(auto in);
@@ -224,7 +266,7 @@ public:
 
     /********************** variables **********************/
 
-private:
+protected:
 
     /********************** functions **********************/
 
@@ -300,6 +342,7 @@ void Myvector<T>::insert(myiterator p, auto in, const T& v)
                     // cout << "deconstructing element" << endl;
                     p->~T();
                 }
+                // delete [] pstart_;
                 pstart_ = pnew_start;
                 pend_ = pstart_ + actSize_;
                 resSize_ = nn;
@@ -351,6 +394,7 @@ void Myvector<T>::insert(myiterator p, auto in, const T& v)
                     // cout << "deconstructing element" << endl;
                     p->~T();
                 }
+                // delete [] pstart_;
                 pstart_ = pnew_start;
                 resSize_ = nn;
             }
@@ -407,6 +451,7 @@ void Myvector<T>::resize(auto in)
                 // cout << "deconstructing element" << endl;
                 p->~T();
             }
+            // delete [] pstart_;
             actSize_ = n;
             pstart_ = pnew_start;
             pend_ = pstart_ + actSize_;
@@ -454,6 +499,7 @@ void Myvector<T>::resize(auto in, const T& v)
                 // cout << "deconstructing element" << endl;
                 p->~T();
             }
+            // delete [] pstart_;
             actSize_ = n;
             pstart_ = pnew_start;
             pend_ = pstart_ + actSize_;
@@ -495,6 +541,7 @@ void Myvector<T>::reserve(auto in)
                 // cout << "deconstructing element" << endl;
                 p->~T();
             }
+            // delete [] pstart_;
             pstart_ = pnew_start;
             pend_ = pstart_ + actSize_;
             resSize_ = n;
@@ -515,137 +562,4 @@ void print_myvec(Myvector<T>& v)
 }
 
 // namespace myfun
-}
-
-using namespace myfun;
-
-int main(int argc, char* argv[])
-{
-
-    vector<int> v_test;
-    v_test.reserve(0);
-
-    Myvector<int> v0(5,3);
-    cout << "v0 capacity:" << v0.capacity() << endl;
-    cout << "v0 size:" << v0.size() << endl;
-    Myvector<int> v(v0);
-    cout << "v capacity:" << v.capacity() << endl;
-    v.reserve(10);
-    cout << "v capacity after reserve:" << v.capacity() << endl;
-    // v.pop_back();
-    cout << "v size:" << v.size() << endl;
-
-    print_myvec(v);
-
-    for(size_t i = 0; i < v.size(); ++i)
-    {
-        v[i] = i;
-    }
-    print_myvec(v);
-
-    cout << endl;
-
-    /*resize & reserve test*/
-    struct Point
-    {
-        // Point(){}
-        Point(int a=111,int b=222):x(a),y(b){}
-        int x,y;
-    };
-    Point p1[3];
-    Myvector<Point> mypvec(3);
-    cout << "mypvec size:" << mypvec.size() << endl;
-    cout << "mypvec capacity:" << mypvec.capacity() << endl;
-    mypvec.resize(5);
-    cout << "mypvec size after resize:" << mypvec.size() << endl;
-    cout << "mypvec capacity:" << mypvec.capacity() << endl;
-    Point p2(1,2);
-    mypvec.resize(10,p2);
-    cout << "mypvec size after resize with input value:" << mypvec.size() << endl;
-    cout << "mypvec capacity:" << mypvec.capacity() << endl;
-    mypvec.reserve(20);
-    cout << "mypvec capacity after reserve:" << mypvec.capacity() << endl;
-    for(size_t i = 0; i < mypvec.size(); ++i)
-    {
-        cout << "mypvec[" << i << "].x:" << mypvec[i].x << endl;
-    }
-    cout << endl;
-
-    /*Copy test*/
-    Myvector<Point> mypvec1(mypvec);
-    cout << "mypvec1 size:" << mypvec1.size() << endl;
-    cout << "mypvec1 capacity:" << mypvec1.capacity() << endl;
-    for(size_t i = 0; i < mypvec1.size(); ++i)
-    {
-        cout << "mypvec1[" << i << "].x:" << mypvec1[i].x << endl;
-    }
-    cout << endl;
-
-    /*Insert test*/
-    Myvector<Point>::myiterator it;
-    it = mypvec.begin();
-    Point p3(3,4);
-    mypvec.insert(it+mypvec.size(),12,p3);
-    // mypvec.insert(it+50,12,p3);
-    cout << "mypvec size after insert:" << mypvec.size() << endl;
-    cout << "mypvec capacity after insert:" << mypvec.capacity() << endl;
-    for(size_t i = 0; i < mypvec.size(); ++i)
-    {
-        cout << "mypvec[" << i << "].x:" << mypvec[i].x << endl;
-    }
-    cout << endl;
-
-    /*Pushback test*/
-    Point p4(5,6);
-    size_t origin_size = mypvec.size();
-    size_t origin_cap = mypvec.capacity();
-    size_t total_num = origin_cap-origin_size;
-    cout << "begin push back "<< total_num << " elements" << endl;
-    for(size_t i = 0; i < total_num; ++i)
-        mypvec.push_back(p4);
-    cout << "mypvec size after push_back:" << mypvec.size() << endl;
-    cout << "mypvec capacity after push_back:" << mypvec.capacity() << endl;
-    for(size_t i = 0; i < mypvec.size(); ++i)
-    {
-        cout << "mypvec[" << i << "].x:" << mypvec[i].x << endl;
-    }
-    cout << endl;
-
-    /* equal assign test*/
-    cout << "begin equal assign" << endl;
-    Myvector<Point> mypvec2;
-    mypvec2 = mypvec;
-    cout << "mypvec2 size:" << mypvec2.size() << endl;
-    cout << "mypvec2 capacity:" << mypvec2.capacity() << endl;
-    for(size_t i = 0; i < mypvec2.size(); ++i)
-    {
-        cout << "mypvec2[" << i << "].x:" << mypvec2[i].x << endl;
-    }
-    cout << endl;
-
-    /* test multidimention vector */
-    cout << "test multidimention vector " << endl;
-    Myvector<Myvector<Point>> my2dpvec;
-    my2dpvec.resize(10);
-    for(size_t i = 0; i < 10; ++i)
-    {
-        Point p5(7,8);
-        my2dpvec[i].resize(5);
-        for(size_t j = 0; j < 5; ++j)
-        {
-            my2dpvec[i][j] = mypvec[0];
-        }
-    }
-
-    cout << "my2dpvec size: " << my2dpvec.size() << ", " << my2dpvec[0].size() << endl;
-    cout << "my2dpvec[1][2].x:" <<  my2dpvec[1][2].x << " y:" << my2dpvec[1][2].y << endl;
-
-
-
-    cout <<endl<< "end of test!!!" << endl;
-
-
-
-
-    return 0;
 }
