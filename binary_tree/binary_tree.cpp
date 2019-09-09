@@ -41,7 +41,7 @@ public:
 
 	TNode<T>* TreeSearchRecur(TNode<T>* x, T data_in);
 	TNode<T>* TreeSearchIter(TNode<T>* x, T data_in);
-	std::vector<T> InorderTreeWalk(TNode<T>* x); // display all values in ascending order of a tree(sub tree)
+	void InorderTreeWalk(TNode<T>* x, std::vector<T>& result); // display all values in ascending order of a tree(sub tree)
 	TNode<T>* GetTreeMin();
 	TNode<T>* GetTreeMin(TNode<T>* x);
 	TNode<T>* GetTreeMax();
@@ -84,14 +84,12 @@ TNode<T>* BiTree<T>::TreeSearchIter(TNode<T>* x, T data_in) { // x is usually a 
 }
 
 template<typename T>
-std::vector<T> BiTree<T>::InorderTreeWalk(TNode<T>* x) { // x is usually a root node of a tree(or sub tree)
-	std::vector<T> result;
-	if (root_ != NULL) {
-		InorderTreeWalk(root_->GetLeft());
-		result.push_back(root_->GetData());
-		InorderTreeWalk(root_->GetRight());
+void BiTree<T>::InorderTreeWalk(TNode<T>* x, std::vector<T>& result) { // x is usually a root node of a tree(or sub tree)
+	if (x != NULL) {
+		InorderTreeWalk(x->GetLeft());
+		result.push_back(x->GetData());
+		InorderTreeWalk(x->GetRight());
 	}
-	return result;
 }
 
 template<typename T>
